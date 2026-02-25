@@ -14,5 +14,4 @@ class Meteo{
   mainCondition: json['weather'][0]['main'],
   );
   }
-
 }
