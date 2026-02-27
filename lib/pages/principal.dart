@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:meteo_app/models/meteo_model.dart';
+import 'package:meteo_app/screens/details.dart';
 import 'package:meteo_app/service/meteo_service.dart';
+import 'package:meteo_app/screens/details.dart';
 
 class Principal extends StatefulWidget {
   const Principal({super.key});
@@ -54,6 +56,21 @@ void initState() {
       return ListTile(
         title: Text(meteo.ville),
         subtitle: Text('${meteo.temperature.round()}°C'),
+        //Pouvoir naviger vers la page Details
+        trailing: IconButton(onPressed: (){
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>  Details(
+                ville: meteo.ville,
+                temperature: meteo.temperature,
+                mainCondition: meteo.mainCondition,
+              ),
+            ),
+          );
+        }, icon: Icon(Icons.alarm_add)),
+
+
       );
         }
       ),
