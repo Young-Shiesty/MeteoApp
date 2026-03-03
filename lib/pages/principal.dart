@@ -1,4 +1,4 @@
-/*import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:meteo_app/models/meteo_model.dart';
 import 'package:meteo_app/screens/details.dart';
@@ -78,4 +78,3 @@ void initState() {
     );
   }
 }
-*/
