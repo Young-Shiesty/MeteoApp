@@ -278,7 +278,9 @@ class _PrincipalState extends State<Principal> {
                               builder: (context) => Details(
                                 ville: meteo.ville,
                                 temperature: meteo.temperature,
-                                mainCondition: meteo.conditionini,
+                                conditionini: meteo.conditionini,  // ← ici
+                                vitessevent: meteo.vitessevent,
+                                humidite: meteo.humidite,
                                 latitude: meteo.latitude,
                                 longitude: meteo.longitude,
                               ),
