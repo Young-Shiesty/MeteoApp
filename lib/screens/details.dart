@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Details extends StatefulWidget {
-  // ✅ Exactement les mêmes champs que le modèle Meteo du coéquipier
+
   final String ville;
   final double temperature;
   final String mainCondition;
@@ -21,10 +21,7 @@ class Details extends StatefulWidget {
 class DetailScreenState extends State<Details> {
   GoogleMapController? mapController;
 
-  // ─────────────────────────────────────────
-  // Coordonnées fixes par ville
-  // (à remplacer quand le coéquipier ajoute lat/lon dans Meteo)
-  // ─────────────────────────────────────────
+
   Map<String, LatLng> coordonnees = {
     "Paris":    LatLng(48.8566, 2.3522),
     "Dakar":    LatLng(14.6937, -17.4441),
@@ -33,14 +30,10 @@ class DetailScreenState extends State<Details> {
     "Tokyo":    LatLng(35.6762, 139.6503),
   };
 
-  // Récupère les coordonnées de la ville ou Paris par défaut
   LatLng getCoordonnees() {
     return coordonnees[widget.ville] ?? LatLng(48.8566, 2.3522);
   }
 
-  // ─────────────────────────────────────────
-  // Icône météo selon mainCondition
-  // ─────────────────────────────────────────
   String getWeatherIcon() {
     switch (widget.mainCondition.toLowerCase()) {
       case "clear":
@@ -63,9 +56,7 @@ class DetailScreenState extends State<Details> {
     }
   }
 
-  // ─────────────────────────────────────────
-  // Description en français selon mainCondition
-  // ─────────────────────────────────────────
+
   String getDescription() {
     switch (widget.mainCondition.toLowerCase()) {
       case "clear":
@@ -114,9 +105,6 @@ class DetailScreenState extends State<Details> {
     );
   }
 
-  // ─────────────────────────────────────────
-  // APP BAR
-  // ─────────────────────────────────────────
   Widget buildAppBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -159,13 +147,9 @@ class DetailScreenState extends State<Details> {
     );
   }
 
-  // ─────────────────────────────────────────
-  // HERO : Ville + Icône + Température
-  // ─────────────────────────────────────────
   Widget buildHeroSection() {
     return Column(
       children: [
-        // Nom de la ville
         Text(
           widget.ville,
           style: const TextStyle(
@@ -178,7 +162,7 @@ class DetailScreenState extends State<Details> {
 
         const SizedBox(height: 12),
 
-        // Icône météo
+
         Text(
           getWeatherIcon(),
           style: const TextStyle(fontSize: 70),
@@ -186,7 +170,7 @@ class DetailScreenState extends State<Details> {
 
         const SizedBox(height: 8),
 
-        // Température
+
         Text(
           "${widget.temperature.toStringAsFixed(1)}°C",
           style: const TextStyle(
@@ -200,7 +184,7 @@ class DetailScreenState extends State<Details> {
 
         const SizedBox(height: 10),
 
-        // Badge description
+
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
           decoration: BoxDecoration(
@@ -228,7 +212,6 @@ class DetailScreenState extends State<Details> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Titre section
           Row(
             children: [
               Container(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meteo_app/pages/home_screen.dart';
 import 'package:meteo_app/pages/principal.dart';
 import 'package:meteo_app/screens/details.dart';
 
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: Principal()
+      home: HomeScreen()
     );
 }
 }
