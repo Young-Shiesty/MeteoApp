@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:meteo_app/models/meteo_model.dart';
+import 'package:meteo_app/pages/principal.dart';
+import 'package:meteo_app/service/meteo_service.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -10,13 +13,8 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
 
-  final List<Map<String, dynamic>> _cities = [
-    {'city': 'DAKAR',     'flag': '🇸🇳', 'temp': '32°C', 'weather': 'Ensoleillé', 'icon': Icons.wb_sunny},
-    {'city': 'NAIROBI',   'flag': '🇰🇪', 'temp': '22°C', 'weather': 'Nuageux',    'icon': Icons.cloud},
-    {'city': 'HONG KONG', 'flag': '🇭🇰', 'temp': '28°C', 'weather': 'Pluvieux',   'icon': Icons.grain},
-    {'city': 'LONDON',    'flag': '🇬🇧', 'temp': '14°C', 'weather': 'Orageux',    'icon': Icons.thunderstorm},
-    {'city': 'PARIS',     'flag': '🇫🇷', 'temp': '18°C', 'weather': 'Venteux',    'icon': Icons.air},
-  ];
+  final meteoService = MeteoService('a5a4809e01d399d956603aa27481262c');
+  List<Meteo> _cities = [];
 
   final List<String> _waitMessages = [
     'Nous téléchargeons les données…',
@@ -32,6 +30,15 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
 
+  Future<void> _fetchCities() async {
+    final villes = ['Dakar', 'Nairobi', 'Hong Kong', 'London', 'Paris'];
+    for (String ville in villes) {
+      try {
+        final meteo = await meteoService.getMeteo(ville);
+        setState(() { _cities.add(meteo); });
+      } catch (e) { print(e); }
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -48,6 +55,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       });
     });
 
+
     _progressController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() => _isComplete = true);
@@ -63,8 +71,9 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _fadeController, curve: Curves.easeIn),
     );
-
+    _fetchCities();
     _progressController.forward();
+
   }
 
   @override
@@ -76,12 +85,26 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
   void _restart() {
     setState(() {
+      _cities = [];
       _progressValue = 0.0;
       _isComplete = false;
       _messageIndex = 0;
     });
+    _fetchCities();
     _fadeController.reset();
     _progressController.forward(from: 0.0);
+  }
+
+
+  String getFlag(String ville) {
+    switch (ville.toLowerCase()) {
+      case 'dakar':     return '🇸🇳';
+      case 'nairobi':   return '🇰🇪';
+      case 'hong kong': return '🇭🇰';
+      case 'london':    return '🇬🇧';
+      case 'paris':     return '🇫🇷';
+      default:          return '🌍';
+    }
   }
 
   @override
@@ -184,7 +207,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                           minHeight: 14,
                           backgroundColor: Colors.white.withOpacity(0.15),
                           valueColor: const AlwaysStoppedAnimation<Color>(
-                            Color(0xFF1E88E5), // bleu vif
+                            Color(0xFF1E88E5),
                           ),
                         ),
                       ),
@@ -211,16 +234,19 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
                         const SizedBox(height: 20),
 
-                        ...List.generate(_cities.length, (index) {
-                          final city = _cities[index];
-                          return _CityCard(
-                            flag: city['flag'],
-                            city: city['city'],
-                            temp: city['temp'],
-                            weather: city['weather'],
-                            icon: city['icon'],
-                          );
-                        }),
+                        ..._cities.map((meteo) => GestureDetector(
+                          onTap: () {
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (context) => const Principal()));
+                          },
+                          child: _CityCard(
+                            flag: getFlag(meteo.ville),
+                            city: meteo.ville.toUpperCase(),
+                            temp: '${meteo.temperature.round()}°C',
+                            weather: meteo.conditionini,
+                            icon: Icons.wb_sunny,
+                          ),
+                        )).toList(),
 
                         const SizedBox(height: 24),
 
@@ -238,7 +264,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                               ),
                             ),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF1E88E5), // bleu vif
+                              backgroundColor: const Color(0xFF1E88E5),
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
@@ -307,7 +333,7 @@ class _CityCard extends StatelessWidget {
             ),
           ),
 
-          Icon(icon, color: Color(0xFF7EC8E3), size: 22), // bleu clair
+          Icon(icon, color: Color(0xFF7EC8E3), size: 22),
           const SizedBox(width: 8),
 
 
