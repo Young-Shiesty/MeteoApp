@@ -45,17 +45,14 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
 
     _progressController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 8),
+      duration: const Duration(seconds: 1),
     );
-
     _progressController.addListener(() {
       setState(() {
         _progressValue = _progressController.value;
         _messageIndex = (_progressController.value * 3).floor().clamp(0, 2);
       });
     });
-
-
     _progressController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         setState(() => _isComplete = true);

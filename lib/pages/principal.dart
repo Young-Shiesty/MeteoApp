@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:meteo_app/models/meteo_model.dart';
 import 'package:meteo_app/pages/home_screen.dart';
+import 'package:meteo_app/pages/main_screen.dart';
 import 'package:meteo_app/service/meteo_service.dart';
 import 'package:meteo_app/screens/details.dart';
 
@@ -169,6 +170,21 @@ class _PrincipalState extends State<Principal> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          GestureDetector(
+            onTap: () => Navigator.push(context,MaterialPageRoute(builder: (context) => const MainScreen())),
+            child: Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: Colors.black26,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.arrow_back_ios_new,
+                color: Colors.black,
+                size:18,
+              ),
+            ),
+          ),
           Text(meteoAffichee?.ville ?? '',
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A2F5E))),
           GestureDetector(
