@@ -134,7 +134,6 @@ class DetailsState extends State<Details> {
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
             ),
-            child: const Icon(Icons.more_horiz, color: Colors.white, size: 20),
           ),
         ],
       ),
