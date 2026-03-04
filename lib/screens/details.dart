@@ -67,8 +67,20 @@ class DetailsState extends State<Details> {
         );
       }
     } catch (e) {
-      debugPrint("Erreur carte: $e");
-    }
+  showDialog(
+  context: context,
+  builder: (_) => AlertDialog(
+  title: const Text('❌ Une erreur est survenue'),
+  content: const Text('🗺️ Impossible d\'ouvrir la carte\nVerifie que Google Maps est installee.'),
+  actions: [
+  TextButton(
+  onPressed: () => Navigator.pop(context),
+  child: const Text('Retour'),
+  ),
+  ],
+  ),
+  );
+  }
   }
 
   @override
