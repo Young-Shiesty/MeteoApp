@@ -6,12 +6,17 @@ class Details extends StatefulWidget {
   final String ville;
   final double temperature;
   final String mainCondition;
+  final double latitude;
+  final double longitude;
 
   const Details({
     super.key,
     required this.ville,
     required this.temperature,
     required this.mainCondition,
+    required this.latitude,
+    required this.longitude,
+
   });
 
   @override

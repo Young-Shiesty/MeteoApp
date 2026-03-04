@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meteo_app/pages/principal.dart';
 import 'main_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -197,7 +198,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       child: ElevatedButton(
                         onPressed: () {
                           Navigator.push(context, MaterialPageRoute(
-                            builder: (_) => const MainScreen(),
+                            builder: (_) => const Principal(),
                           ));
                         },
                         style: ElevatedButton.styleFrom(
