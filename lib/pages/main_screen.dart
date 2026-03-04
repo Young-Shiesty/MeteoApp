@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:meteo_app/models/meteo_model.dart';
+import 'package:meteo_app/pages/home_screen.dart';
 import 'package:meteo_app/pages/principal.dart';
 import 'package:meteo_app/service/meteo_service.dart';
 
@@ -36,7 +37,25 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
       try {
         final meteo = await meteoService.getMeteo(ville);
         setState(() { _cities.add(meteo); });
-      } catch (e) { print(e); }
+      }  catch (e) {
+    showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+    title: const Text('❌ Une erreur est survenue'),
+    content: Text(e.toString().contains('401') ? '🔑 Clé API invalide' : e.toString().contains('500') ? '🌐 Serveur OpenWeather en panne' : '📡 Vérifie ta connexion internet'),
+    actions: [
+    TextButton(
+    onPressed: () {
+    Navigator.pop(context);
+    Navigator.pop(context);
+    },
+    child: const Text('Retour'),
+    ),
+    ],
+    ),
+    );
+    return;
+    }
     }
   }
   @override
@@ -81,15 +100,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
   }
 
   void _restart() {
-    setState(() {
-      _cities = [];
-      _progressValue = 0.0;
-      _isComplete = false;
-      _messageIndex = 0;
-    });
-    _fetchCities();
-    _fadeController.reset();
-    _progressController.forward(from: 0.0);
+    Navigator.push(context,MaterialPageRoute(builder: (context) => const HomeScreen()));
   }
 
 

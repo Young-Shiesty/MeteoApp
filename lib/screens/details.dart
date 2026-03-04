@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:map_launcher/map_launcher.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class Details extends StatefulWidget {
-
+  // ✅ Exactement les mêmes champs que le modèle Meteo du coéquipier
   final String ville;
   final double temperature;
-  final String conditionini;
-  final double vitessevent;
-  final int humidite;
+  final String mainCondition;
   final double latitude;
   final double longitude;
 
@@ -15,66 +13,90 @@ class Details extends StatefulWidget {
     super.key,
     required this.ville,
     required this.temperature,
-    required this.conditionini,
-    required this.vitessevent,
-    required this.humidite,
+    required this.mainCondition,
     required this.latitude,
     required this.longitude,
+
   });
 
   @override
-  State<Details> createState() => DetailsState();
+  State<Details> createState() => DetailScreenState();
 }
 
-class DetailsState extends State<Details> {
+class DetailScreenState extends State<Details> {
+  GoogleMapController? mapController;
 
+  // ─────────────────────────────────────────
+  // Coordonnées fixes par ville
+  // (à remplacer quand le coéquipier ajoute lat/lon dans Meteo)
+  // ─────────────────────────────────────────
+  Map<String, LatLng> coordonnees = {
+    "Paris":    LatLng(48.8566, 2.3522),
+    "Dakar":    LatLng(14.6937, -17.4441),
+    "London":   LatLng(51.5074, -0.1278),
+    "New York": LatLng(40.7128, -74.0060),
+    "Tokyo":    LatLng(35.6762, 139.6503),
+  };
+
+  // Récupère les coordonnées de la ville ou Paris par défaut
+  LatLng getCoordonnees() {
+    return coordonnees[widget.ville] ?? LatLng(48.8566, 2.3522);
+  }
+
+  // ─────────────────────────────────────────
+  // Icône météo selon mainCondition
+  // ─────────────────────────────────────────
   String getWeatherIcon() {
-    switch (widget.conditionini.toLowerCase()) {
-      case "clear":        return "☀️";
-      case "clouds":       return "☁️";
-      case "rain":         return "🌧️";
-      case "drizzle":      return "🌦️";
-      case "thunderstorm": return "⛈️";
-      case "snow":         return "❄️";
+    switch (widget.mainCondition.toLowerCase()) {
+      case "clear":
+        return "☀️";
+      case "clouds":
+        return "☁️";
+      case "rain":
+        return "🌧️";
+      case "drizzle":
+        return "🌦️";
+      case "thunderstorm":
+        return "⛈️";
+      case "snow":
+        return "❄️";
       case "mist":
-      case "fog":          return "🌫️";
-      default:             return "⛅";
+      case "fog":
+        return "🌫️";
+      default:
+        return "⛅";
     }
   }
 
+  // ─────────────────────────────────────────
+  // Description en français selon mainCondition
+  // ─────────────────────────────────────────
   String getDescription() {
-    switch (widget.conditionini.toLowerCase()) {
-      case "clear":        return "Ciel dégagé";
-      case "clouds":       return "Nuageux";
-      case "rain":         return "Pluvieux";
-      case "drizzle":      return "Bruine";
-      case "thunderstorm": return "Orage";
-      case "snow":         return "Neige";
+    switch (widget.mainCondition.toLowerCase()) {
+      case "clear":
+        return "Ciel dégagé";
+      case "clouds":
+        return "Nuageux";
+      case "rain":
+        return "Pluvieux";
+      case "drizzle":
+        return "Bruine";
+      case "thunderstorm":
+        return "Orage";
+      case "snow":
+        return "Neige";
       case "mist":
-      case "fog":          return "Brouillard";
-      default:             return widget.conditionini;
-    }
-  }
-
-  Future<void> ouvrirCarte() async {
-    try {
-      final availableMaps = await MapLauncher.installedMaps;
-      if (availableMaps.isNotEmpty) {
-        await availableMaps.first.showMarker(
-          coords: Coords(widget.latitude, widget.longitude),
-          title: widget.ville,
-          description: "${widget.temperature.toStringAsFixed(1)}°C - ${getDescription()}",
-        );
-      }
-    } catch (e) {
-      debugPrint("Erreur carte: $e");
+      case "fog":
+        return "Brouillard";
+      default:
+        return widget.mainCondition;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0D1B2A),
+      backgroundColor: const Color(0xFF0F1923),
       body: SafeArea(
         child: Column(
           children: [
@@ -85,10 +107,8 @@ class DetailsState extends State<Details> {
                   children: [
                     buildHeroSection(),
                     const SizedBox(height: 20),
-                    buildStatsCards(),
-                    const SizedBox(height: 24),
                     buildMapSection(),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
@@ -99,6 +119,9 @@ class DetailsState extends State<Details> {
     );
   }
 
+  // ─────────────────────────────────────────
+  // APP BAR
+  // ─────────────────────────────────────────
   Widget buildAppBar(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -111,9 +134,9 @@ class DetailsState extends State<Details> {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: Colors.white.withValues(alpha: 0.07),
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
               ),
               child: const Icon(Icons.arrow_back, color: Colors.white, size: 20),
             ),
@@ -130,9 +153,9 @@ class DetailsState extends State<Details> {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
+              color: Colors.white.withValues(alpha: 0.07),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
             child: const Icon(Icons.more_horiz, color: Colors.white, size: 20),
           ),
@@ -141,24 +164,34 @@ class DetailsState extends State<Details> {
     );
   }
 
+  // ─────────────────────────────────────────
+  // HERO : Ville + Icône + Température
+  // ─────────────────────────────────────────
   Widget buildHeroSection() {
     return Column(
       children: [
+        // Nom de la ville
         Text(
           widget.ville,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 38,
+            fontSize: 36,
             fontWeight: FontWeight.w900,
             letterSpacing: -1,
           ),
         ),
+
         const SizedBox(height: 12),
+
+        // Icône météo
         Text(
           getWeatherIcon(),
-          style: const TextStyle(fontSize: 80),
+          style: const TextStyle(fontSize: 70),
         ),
+
         const SizedBox(height: 8),
+
+        // Température
         Text(
           "${widget.temperature.toStringAsFixed(1)}°C",
           style: const TextStyle(
@@ -169,13 +202,16 @@ class DetailsState extends State<Details> {
             height: 1,
           ),
         ),
+
         const SizedBox(height: 10),
+
+        // Badge description
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.08),
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
           ),
           child: Text(
             getDescription(),
@@ -186,74 +222,29 @@ class DetailsState extends State<Details> {
     );
   }
 
-  Widget buildStatsCards() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          statCard("💧", "${widget.humidite}%", "Humidité"),
-          const SizedBox(width: 8),
-          statCard("💨", "${widget.vitessevent.toStringAsFixed(1)} m/s", "Vent"),
-          const SizedBox(width: 8),
-          statCard("📍", widget.latitude.toStringAsFixed(2), "Latitude"),
-          const SizedBox(width: 8),
-          statCard("🧭", widget.longitude.toStringAsFixed(2), "Longitude"),
-        ],
-      ),
-    );
-  }
-
-  Widget statCard(String icon, String value, String label) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 6),
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.07),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-        ),
-        child: Column(
-          children: [
-            Text(icon, style: const TextStyle(fontSize: 22)),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: const TextStyle(color: Colors.white38, fontSize: 10),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
+  // ─────────────────────────────────────────
+  // SECTION GOOGLE MAPS
+  // ─────────────────────────────────────────
   Widget buildMapSection() {
+    LatLng position = getCoordonnees();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Titre section
           Row(
             children: [
               Container(
                 width: 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7EC8E3),
+                  color: const Color(0xFF00E5FF),
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFF7EC8E3).withValues(alpha: 0.6),
+                      color: const Color(0xFF00E5FF).withValues(alpha: 0.6),
                       blurRadius: 8,
                     ),
                   ],
@@ -271,78 +262,35 @@ class DetailsState extends State<Details> {
               ),
             ],
           ),
+
           const SizedBox(height: 10),
-          GestureDetector(
-            onTap: ouvrirCarte,
-            child: Container(
-              height: 200,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Color(0xFF1B3A6B),
-                    Color(0xFF0D1B2A),
-                  ],
+
+          // Carte Google Maps
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: SizedBox(
+              height: 250,
+              child: GoogleMap(
+                initialCameraPosition: CameraPosition(
+                  target: position,
+                  zoom: 12,
                 ),
-                border: Border.all(
-                  color: const Color(0xFF7EC8E3).withValues(alpha: 0.3),
-                ),
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  CustomPaint(
-                    size: const Size(double.infinity, 200),
-                    painter: MapGridPainter(),
+                onMapCreated: (controller) {
+                  mapController = controller;
+                },
+                markers: {
+                  Marker(
+                    markerId: MarkerId(widget.ville),
+                    position: position,
+                    infoWindow: InfoWindow(
+                      title: widget.ville,
+                      snippet: "${widget.temperature.toStringAsFixed(1)}°C - ${getDescription()}",
+                    ),
                   ),
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.location_on, color: Colors.red, size: 48),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          "${widget.ville} • ${widget.temperature.toStringAsFixed(0)}°C",
-                          style: const TextStyle(
-                            color: Colors.black87,
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E88E5),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: const Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(Icons.map, color: Colors.white, size: 16),
-                            SizedBox(width: 6),
-                            Text(
-                              "Ouvrir dans Maps",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                },
+                zoomControlsEnabled: true,
+                mapToolbarEnabled: false,
+                myLocationButtonEnabled: false,
               ),
             ),
           ),
@@ -350,23 +298,4 @@ class DetailsState extends State<Details> {
       ),
     );
   }
-}
-
-class MapGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.05)
-      ..strokeWidth = 1;
-
-    for (double y = 0; y < size.height; y += 20) {
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
-    }
-    for (double x = 0; x < size.width; x += 20) {
-      canvas.drawLine(Offset(x, 0), Offset(x, size.height), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }

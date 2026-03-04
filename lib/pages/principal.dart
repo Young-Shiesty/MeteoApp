@@ -6,8 +6,8 @@ import 'package:meteo_app/pages/main_screen.dart';
 import 'package:meteo_app/service/meteo_service.dart';
 import 'package:meteo_app/screens/details.dart';
 
-
 class Principal extends StatefulWidget {
+
   const Principal({super.key});
 
   @override
@@ -45,8 +45,25 @@ class _PrincipalState extends State<Principal> {
         final meteo = await meteoService.getMeteo(ville);
         meteoList.add(meteo);
       } catch (e) {
-        print('Erreur pour $ville : $e');
-      }
+    timer?.cancel();
+    setState(() { loading = false; });
+    showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+    title: const Text('❌ Une erreur est survenue'),
+    content: Text(e.toString().contains('401')  ? '🔑 Clé API invalide' : e.toString().contains('500') ? '🌐 Serveur OpenWeather en panne' : '📡 Vérifie ta connexion internet'),
+    actions: [
+    TextButton(
+    onPressed: () {
+      Navigator.push(context,MaterialPageRoute(builder: (context) => const MainScreen()));
+    },
+    child: const Text('Retour'),
+    ),
+    ],
+    ),
+    );
+    return;
+    }
     }
     if (meteoList.isNotEmpty) {
       setState(() {
@@ -54,7 +71,6 @@ class _PrincipalState extends State<Principal> {
       });
     }
   }
-
   void lancerChargement() {
     setState(() {
       loading = true;
@@ -294,9 +310,7 @@ class _PrincipalState extends State<Principal> {
                               builder: (context) => Details(
                                 ville: meteo.ville,
                                 temperature: meteo.temperature,
-                                conditionini: meteo.conditionini,  // ← ici
-                                vitessevent: meteo.vitessevent,
-                                humidite: meteo.humidite,
+                                mainCondition: meteo.conditionini,
                                 latitude: meteo.latitude,
                                 longitude: meteo.longitude,
                               ),

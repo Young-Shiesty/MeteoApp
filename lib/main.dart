@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meteo_app/pages/home_screen.dart';
 import 'package:meteo_app/pages/principal.dart';
 
 void main() {
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: Principal(),
+      home: HomeScreen(),
     );
 }
 }
