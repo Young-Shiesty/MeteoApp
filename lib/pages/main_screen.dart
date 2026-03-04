@@ -144,7 +144,7 @@ class _MainScreenState extends State<MainScreen> with TickerProviderStateMixin {
                 Row(
                   children: [
                     GestureDetector(
-                      onTap: () => Navigator.pop(context),
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => HomeScreen())),
                       child: Container(
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
